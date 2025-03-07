@@ -1,18 +1,18 @@
 import React, { useState } from "react";
+import CardList from "./SAF";
 
 const apiKey = "1e1d85f8-552f-4721-8f2a-66a521a52b20";
 
 const search = () => {
 
-    const [cardName, setCardName] = useState("");
-    const [cardData, setCardData] = useState([]);
-    const [collections] = useState([
-        "My Collection 1",
-        "My Collection 2",
-        "My Collection 3",
-    ]);
+  const [cardName, setCardName] = useState("");
+  const [cardData, setCardData] = useState([]);
+  const [collections] = useState([
+    "My Collection 1",
+    "My Collection 2",
+    "My Collection 3",
+  ]);
 
-  // Fetch cards based on the entered card name.
   const handleSearch = () => {
     if (!cardName.trim()) {
       alert("Please enter a search term.");
@@ -20,7 +20,6 @@ const search = () => {
     }
 
     const searchText = cardName.trim();
-    // Build a query that checks in card name, set name, or set release date.
     const query = `name:${encodeURIComponent(
       searchText
     )} OR set.name:${encodeURIComponent(
@@ -47,18 +46,16 @@ const search = () => {
       });
   };
 
-  // Handle adding a card to the chosen collection.
   const handleAddToCollection = (card, selectedCollection) => {
     if (!selectedCollection) {
       alert("Please select a collection first.");
       return;
     }
     console.log(`Adding ${card.name} to ${selectedCollection}`);
-    // Insert logic to add the card to a collection (e.g., update state or make an API call)
   };
-
+  
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", padding: "20px" }}>
+    <div>
       <h1>Search for a Pokémon Card</h1>
       <input
         type="text"
@@ -67,8 +64,16 @@ const search = () => {
         onChange={(e) => setCardName(e.target.value)}
       />
       <button onClick={handleSearch}>Search</button>
+      <div
+        style={{
+          opacity: cardData.length > 0 ? 1 : 0.5,
+          pointerEvents: cardData.length > 0 ? "auto" : "none",
+        }}
+      >
+        <CardList />
+      </div>
 
-      <div className="container" style={{ marginTop: "20px" }}>
+      <div className="container">
         <div className="row">
           {cardData.length > 0 ? (
             cardData.map((card) => (
@@ -90,28 +95,27 @@ const search = () => {
 
 
 
-    const CardBlock = ({ card, collections, addToCollection }) => {
-    const [selectedCollection, setSelectedCollection] = useState("");
+  const CardBlock = ({ card, collections, addToCollection }) => {
+  const [selectedCollection, setSelectedCollection] = useState("");
 
-    const releaseYear =
-        card.set && card.set.releaseDate
-        ? new Date(card.set.releaseDate).getFullYear(): "N/A";
+  const releaseYear =
+    card.set && card.set.releaseDate
+    ? new Date(card.set.releaseDate).getFullYear(): "N/A";
 
-    const marketValue =
-        card.cardmarket &&
-        card.cardmarket.prices &&
-        card.cardmarket.prices.averageSellPrice
-        ? `$${card.cardmarket.prices.averageSellPrice}`: "N/A";
+  const marketValue =
+      card.cardmarket &&
+      card.cardmarket.prices &&
+      card.cardmarket.prices.averageSellPrice
+      ? `$${card.cardmarket.prices.averageSellPrice}`: "N/A";
 
     return (
-        <div className="col-2 mb-2">
-            <div className="card" style={{ padding: "10px", margin: "10px" }}>
+        <div className="card-block">
+            <div className="card">
                 <h5 className="card-title">{card.name}</h5>
                     <img
                     src={card.images?.large || card.images?.small}
                     className="card-img-top"
                     alt={card.name}
-                    style={{ maxWidth: "70%", height: "auto" }}
             />
             <div className="card-body">
                 <p className="card-text">
@@ -123,8 +127,8 @@ const search = () => {
                 <p className="card-text">
                     <strong>Market Value:</strong> {marketValue}
                 </p>
-                <div className="dropdown-container" style={{ display: "absolute", alignItems: "center" }}>
-                    <select value={selectedCollection} onChange={(e) => setSelectedCollection(e.target.value)} style={{ marginRight: "10px" }}>
+                <div className="dropdown-container">
+                    <select value={selectedCollection} onChange={(e) => setSelectedCollection(e.target.value)}>
                         <option value="">Select a collection</option>
                         {collections.map((collection, idx) => (
                             <option key={idx} value={collection}>
@@ -134,7 +138,7 @@ const search = () => {
                     </select>
                 </div>
                 <p>
-                    <button onClick={() => addToCollection(card, selectedCollection)}>Add to Collection</button>
+                  <button onClick={() => addToCollection(card, selectedCollection)}>Add to Collection</button>
                 </p>
             </div>
         </div>

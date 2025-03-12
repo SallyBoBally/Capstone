@@ -1,17 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import CardList from "./SAF";
 
 const apiKey = "1e1d85f8-552f-4721-8f2a-66a521a52b20";
 
-const search = () => {
-
+const Search = () => {
   const [cardName, setCardName] = useState("");
   const [cardData, setCardData] = useState([]);
-  const [collections] = useState([
-    "My Collection 1",
-    "My Collection 2",
-    "My Collection 3",
-  ]);
+  const [collections, setCollections] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+    if (token) {
+      fetchCollections(token);
+    }
+  }, []);
+
+  const fetchCollections = async (token) => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/collection", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCollections(response.data);
+    } catch (error) {
+      console.error("Error fetching collections:", error);
+    }
+  };
 
   const handleSearch = () => {
     if (!cardName.trim()) {
@@ -20,13 +36,8 @@ const search = () => {
     }
 
     const searchText = cardName.trim();
-    const query = `name:${encodeURIComponent(
-      searchText
-    )} OR set.name:${encodeURIComponent(
-      searchText
-    )} OR set.releaseDate:${encodeURIComponent(searchText)}`;
+    const query = `name:${encodeURIComponent(searchText)} OR set.name:${encodeURIComponent(searchText)} OR set.releaseDate:${encodeURIComponent(searchText)}`;
     const url = `https://api.pokemontcg.io/v2/cards?q=${query}`;
-
 
     fetch(url, {
       headers: {
@@ -34,26 +45,34 @@ const search = () => {
       },
     })
       .then((response) => response.json())
-      .then((data) => {
-        if (data.data && data.data.length) {
-          setCardData(data.data);
-        } else {
-          setCardData([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching card:", err);
-      });
+      .then((data) => setCardData(data.data || []))
+      .catch((err) => console.error("Error fetching card:", err));
   };
 
-  const handleAddToCollection = (card, selectedCollection) => {
+  const handleAddToCollection = async (card, selectedCollection) => {
     if (!selectedCollection) {
-      alert("Please select a collection first.");
-      return;
+        alert("Please select a collection first.");
+        return;
     }
-    console.log(`Adding ${card.name} to ${selectedCollection}`);
-  };
-  
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("You must be logged in to add cards to a collection.");
+        return;
+    }
+
+    try {
+        const response = await axios.post(
+            "http://localhost:5000/api/add-to-collection",
+            { collectionId: selectedCollection, card },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        alert(response.data.message);
+    } catch (error) {
+        console.error("Error adding card:", error);
+    }
+};
+
   return (
     <div>
       <h1>Search for a Pokémon Card</h1>
@@ -64,6 +83,7 @@ const search = () => {
         onChange={(e) => setCardName(e.target.value)}
       />
       <button onClick={handleSearch}>Search</button>
+
       <div
         style={{
           opacity: cardData.length > 0 ? 1 : 0.5,
@@ -82,6 +102,7 @@ const search = () => {
                 card={card}
                 collections={collections}
                 addToCollection={handleAddToCollection}
+                isAuthenticated={isAuthenticated}
               />
             ))
           ) : (
@@ -93,57 +114,39 @@ const search = () => {
   );
 };
 
-
-
-  const CardBlock = ({ card, collections, addToCollection }) => {
+const CardBlock = ({ card, collections, addToCollection, isAuthenticated }) => {
   const [selectedCollection, setSelectedCollection] = useState("");
 
-  const releaseYear =
-    card.set && card.set.releaseDate
-    ? new Date(card.set.releaseDate).getFullYear(): "N/A";
+  return (
+    <div className="card-block">
+      <div className="card">
+        <h5 className="card-title">{card.name}</h5>
+        <img
+          src={card.images?.large || card.images?.small}
+          className="card-img-top"
+          alt={card.name}
+        />
+        <div className="card-body">
+          <p><strong>Set:</strong> {card.set?.name || "N/A"}</p>
+          <p><strong>Market Value:</strong> {card.cardmarket?.prices?.averageSellPrice || "N/A"}</p>
 
-  const marketValue =
-      card.cardmarket &&
-      card.cardmarket.prices &&
-      card.cardmarket.prices.averageSellPrice
-      ? `$${card.cardmarket.prices.averageSellPrice}`: "N/A";
-
-    return (
-        <div className="card-block">
-            <div className="card">
-                <h5 className="card-title">{card.name}</h5>
-                    <img
-                    src={card.images?.large || card.images?.small}
-                    className="card-img-top"
-                    alt={card.name}
-            />
-            <div className="card-body">
-                <p className="card-text">
-                    <strong>Set:</strong> {card.set?.name || "N/A"}
-                </p>
-                <p className="card-text">
-                    <strong>Year:</strong> {releaseYear}
-                </p>
-                <p className="card-text">
-                    <strong>Market Value:</strong> {marketValue}
-                </p>
-                <div className="dropdown-container">
-                    <select value={selectedCollection} onChange={(e) => setSelectedCollection(e.target.value)}>
-                        <option value="">Select a collection</option>
-                        {collections.map((collection, idx) => (
-                            <option key={idx} value={collection}>
-                                {collection}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <p>
-                  <button onClick={() => addToCollection(card, selectedCollection)}>Add to Collection</button>
-                </p>
-            </div>
+          {isAuthenticated ? (
+            <>
+              <select value={selectedCollection} onChange={(e) => setSelectedCollection(e.target.value)}>
+                <option value="">Select Collection</option>
+                {collections.map((col) => (
+                  <option key={col._id} value={col._id}>{col.name}</option>
+                ))}
+              </select>
+              <button onClick={() => addToCollection(card, selectedCollection)}>Add to Collection</button>
+            </>
+          ) : (
+            <p>Login to add to collection</p>
+          )}
         </div>
+      </div>
     </div>
   );
 };
 
-export default search;
+export default Search;

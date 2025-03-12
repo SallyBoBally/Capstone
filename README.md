@@ -13,3 +13,16 @@
 collections need edit button to add and delete
 
 added filter and sort when searching for cards
+
+only authorized users can add to collection
+
+authorized users can now create edit and delete their own collections
+
+made small profile page pfp button, description and  links to collections
+
+trouble with description, removing for now
+
+authorized users can now delete cards from their collection
+
+profile pictures can be uploaded
+

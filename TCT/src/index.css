@@ -1,5 +1,5 @@
 body {
-  background: linear-gradient(0deg, RGBA(0,0,0,1) 0%, RGBA(200,255,196,1) 100%);
+  background: linear-gradient(0deg, RGBA(0,0,0,1) 0%, RGBA(200,255,196,1) 90%);
   background-attachment: fixed;
   background-size: cover;
   margin: center;
@@ -49,6 +49,49 @@ body {
   color: black;
   font-size: 1.2rem;
   transition: color 0.3s ease;
+}
+
+.navbar-button {
+  text-decoration: underline 2px;
+  color: black;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+/* home */
+.home-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+.home-section {
+  display: flex;
+  align-items: center;
+  margin: 40px 0;
+}
+
+.home-section:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+.home-text {
+  font-size: 25px;
+  flex: 1;
+  padding: 20px;
+  text-align: left;
+}
+
+.home-image {
+  flex: .4;
+  position: relative;
+  text-align: center;
+}
+
+.home-image img {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 /* card search */
@@ -239,7 +282,7 @@ body {
   text-decoration: underline;
 }
 
-/* Input Fields */
+/* form*/
 form input {
   width: 100%;
   padding: 10px;
@@ -249,7 +292,6 @@ form input {
   box-sizing: border-box;
 }
 
-/* Button Styling */
 form button {
   width: 100%;
   padding: 10px;
@@ -267,3 +309,83 @@ form button:hover {
 }
 
 /* profile */
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.profile-header {
+  width: 400px;
+  height: 80%;
+  margin-bottom: 20px;
+  align-content: right;
+}
+
+.profile-upload {
+  position: relative;
+  left: 30%;
+}
+
+.profile-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #ddd;
+}
+
+.profile-button {
+  display: inline-block;
+  padding: 0.3rem .8rem;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 1px;
+  font-size: 13px;
+  text-align: right;
+}
+
+.profile-name {
+  font-size: 36px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.profile-description {
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.profile-links {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  max-width: 800px;
+  width: 100%;
+}
+
+.left-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.center-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.link-button,
+.main-button {
+  padding: 10px 20px;
+  border: 2px solid #000;
+  background-color: transparent;
+  font-weight: bold;
+  cursor: pointer;
+  width: 200px;
+  text-align: center;
+}

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import CardList from "./SAF";
 
-const apiKey = "1e1d85f8-552f-4721-8f2a-66a521a52b20";
+const apiKey = "TCG_API_KEY";
 
 const Search = () => {
   const [cardName, setCardName] = useState("");
   const [cardData, setCardData] = useState([]);
+  const [sortedData, setSortedData] = useState([]);
+  const [sortOption, setSortOption] = useState("name-asc");
   const [collections, setCollections] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -17,6 +18,10 @@ const Search = () => {
       fetchCollections(token);
     }
   }, []);
+
+  useEffect(() => {
+    handleSort(sortOption);
+  }, [cardData, sortOption]);
 
   const fetchCollections = async (token) => {
     try {
@@ -45,33 +50,64 @@ const Search = () => {
       },
     })
       .then((response) => response.json())
-      .then((data) => setCardData(data.data || []))
+      .then((data) => {
+        setCardData(data.data || []);
+      })
       .catch((err) => console.error("Error fetching card:", err));
+  };
+
+  const handleSort = (option) => {
+    let sorted = [...cardData];
+    switch (option) {
+      case "name-asc":
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "name-desc":
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "price-asc":
+        sorted.sort(
+          (a, b) =>
+            (a.cardmarket?.prices?.averageSellPrice || 0) -
+            (b.cardmarket?.prices?.averageSellPrice || 0)
+        );
+        break;
+      case "price-desc":
+        sorted.sort(
+          (a, b) =>
+            (b.cardmarket?.prices?.averageSellPrice || 0) -
+            (a.cardmarket?.prices?.averageSellPrice || 0)
+        );
+        break;
+      default:
+        break;
+    }
+    setSortedData(sorted);
   };
 
   const handleAddToCollection = async (card, selectedCollection) => {
     if (!selectedCollection) {
-        alert("Please select a collection first.");
-        return;
+      alert("Please select a collection first.");
+      return;
     }
 
     const token = localStorage.getItem("token");
     if (!token) {
-        alert("You must be logged in to add cards to a collection.");
-        return;
+      alert("You must be logged in to add cards to a collection.");
+      return;
     }
 
     try {
-        const response = await axios.post(
-            "http://localhost:5000/api/add-to-collection",
-            { collectionId: selectedCollection, card },
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-        alert(response.data.message);
+      const response = await axios.post(
+        "http://localhost:5000/api/add-to-collection",
+        { collectionId: selectedCollection, card },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert(response.data.message);
     } catch (error) {
-        console.error("Error adding card:", error);
+      console.error("Error adding card:", error);
     }
-};
+  };
 
   return (
     <div>
@@ -84,19 +120,23 @@ const Search = () => {
       />
       <button onClick={handleSearch}>Search</button>
 
-      <div
-        style={{
-          opacity: cardData.length > 0 ? 1 : 0.5,
-          pointerEvents: cardData.length > 0 ? "auto" : "none",
-        }}
-      >
-        <CardList />
+      <div>
+        <label>Sort by: </label>
+        <select
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+        >
+          <option value="name-asc">Name (A-Z)</option>
+          <option value="name-desc">Name (Z-A)</option>
+          <option value="price-asc">Price (Low to High)</option>
+          <option value="price-desc">Price (High to Low)</option>
+        </select>
       </div>
 
       <div className="container">
         <div className="row">
-          {cardData.length > 0 ? (
-            cardData.map((card) => (
+          {sortedData.length > 0 ? (
+            sortedData.map((card) => (
               <CardBlock
                 key={card.id}
                 card={card}

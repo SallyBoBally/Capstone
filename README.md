@@ -26,3 +26,5 @@ authorized users can now delete cards from their collection
 
 profile pictures can be uploaded
 
+fixed sort by menu
+

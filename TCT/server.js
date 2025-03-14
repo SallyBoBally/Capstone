@@ -8,6 +8,7 @@ import Collection from './models/Collection.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import mongoose from 'mongoose';
 
 dotenv.config();
 
